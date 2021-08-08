@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Vue-Summer-Camp-Week3</title>
+		<link
+			href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+			rel="stylesheet"
+			integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+			crossorigin="anonymous"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css?family=Press+Start+2P"
+			rel="stylesheet"
+		/>
+		<link href="https://unpkg.com/nes.css/css/nes.css" rel="stylesheet" />
+		<link rel="stylesheet" href="/all.css" />
+	</head>
+	<body>
+		<div id="app">
+			<header>
+				<nav class="navbar navbar-light bg-warning fw-light">
+					<div class="container-fluid">
+						<i class="nes-mario"></i>
+						<i class="nes-icon coin is-large"></i>
+						<i class="nes-icon coin is-large"></i>
+						<i class="nes-icon coin is-large"></i>
+						<span class="navbar-brand mb-0 h1">Summer-Vue-Camp Week-3</span>
+					</div>
+				</nav>
+			</header>
+			<div class="main mt-5">
+				<div class="container">
+					<div class="nes-container is-dark with-title">
+						<p class="title">Todo-list</p>
+						<p>WHAT NEEDS TO BE DONE ?</p>
+						<div
+							style="background-color: #212529; padding: 1rem"
+							class="nes-field is-inline"
+						>
+							<label for="dark_field" style="color: #fff">TASK</label>
+							<input
+								type="text"
+								id="dark_field"
+								class="nes-input is-dark"
+								placeholder="WRITE DONE HERE.."
+								id="newTodo"
+								v-model.trim="newTodo"
+								@keyup.enter="creatItem"
+							/>
+							<button
+								type="button"
+								class="nes-btn is-primary"
+								id="addTodo"
+								@click="creatItem"
+							>
+								NEW
+							</button>
+						</div>
+					</div>
+					<!-- HISTORY TASK -->
+					<div class="nes-container is-dark with-title mt-5">
+						<p class="title">Task</p>
+
+						<div class="lists">
+							<ul class="nes-list is-circle" id="todoList">
+								<li v-for="(item, index) in filterData" :key="item.id">
+									<input
+										type="checkbox"
+										class="nes-checkbox is-dark"
+										:id="'a'+item.id"
+										v-model="item.finish"
+									/>
+									<label
+										:for="'a'+item.id"
+										:class="{ 'text-decoration-line-through': item.finish }"
+									>
+										{{ item.text }}
+									</label>
+
+									<div class="nes-field is-inline" v-show="temp.id === item.id">
+										<label for="inline_field">EDIT</label>
+										<input
+											type="text"
+											id="inline_field"
+											class="nes-input is-success"
+											placeholder="EDIT SOMETHING.."
+											v-model.trim="temp.text"
+											@keyup.enter="updateItem"
+										/>
+										<button
+											type="button"
+											class="nes-btn is-success"
+											value="編輯完成"
+											@click="updateItem()"
+										>
+											DONE
+										</button>
+									</div>
+									<div class="d-flex justify-content-end">
+										<button
+											type="button"
+											class="nes-btn is-success"
+											@click="editItem(item)"
+										>
+											EDIT
+										</button>
+										<button
+											type="button"
+											class="nes-btn is-error text-end"
+											@click="delItem(item)"
+										>
+											DELETE
+										</button>
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<!--TASK SELECT STATE -->
+					<div class="nes-container is-dark with-title mt-5">
+						<p class="title">TASK STATE</p>
+						<div class="">
+							<div class="mb-5 d-flex justify-content-center">
+								<span class="nes-text is-success" id="taskCount"
+									>{{ todoList.length }}</span
+								>
+								<span class="nes-text is-warning">TASKS</span>
+							</div>
+
+							<div class="d-flex justify-content-evenly">
+								<a href="#" class="nes-badge" @click.prevent="status = 'all'">
+									<span class="is-primary">all</span>
+								</a>
+
+								<a href="#" class="nes-badge" @click.prevent="status = false">
+									<span class="is-success">undone</span>
+								</a>
+
+								<a href="#" class="nes-badge" @click.prevent="status = true">
+									<span class="is-warning">done</span>
+								</a>
+
+								<a href="#" class="nes-badge" @click.prevent="removeAll">
+									<span class="is-error">delete</span>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script
+			src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"
+			integrity="sha384-p34f1UUtsS3wqzfto5wAAmdvj+osOnFyQFpp4Ua3gs/ZVWx6oOypYoCJhGGScy+8"
+			crossorigin="anonymous"
+		></script>
+		<script src="https://unpkg.com/vue@next"></script>
+		<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+		<script
+			src="https://code.jquery.com/jquery-3.6.0.min.js"
+			integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+			crossorigin="anonymous"
+		></script>
+		<script>
+			Vue.createApp({
+				data() {
+					return {
+						newTodo: "",
+						temp: "",
+						todoList: [],
+						edit: false,
+						num: 0,
+						status: "all",
+					}
+				},
+
+				methods: {
+					creatItem() {
+						if (this.newTodo) {
+							this.num++
+							this.todoList.push({
+								text: this.newTodo,
+								id: this.num,
+								finish: false,
+							})
+							this.newTodo = ""
+						}
+					},
+					editItem(item) {
+						this.edit = true
+						this.temp = { ...item }
+					},
+					updateItem() {
+						const index = this.todoList.findIndex(
+							(obj) => obj.id === this.temp.id
+						)
+						this.todoList[index] = this.temp
+						this.edit = false
+						this.temp = ""
+					},
+					delItem(item) {
+						const index = this.todoList.findIndex((obj) => obj.id === item.id)
+						this.todoList.splice(index, 1)
+					},
+					removeAll() {
+						if (window.confirm("DELECT  ALL TASK ? 🥺🥺")) {
+							this.todoList = []
+						}
+					},
+				},
+				computed: {
+					// 篩選狀態
+					filterData() {
+						if (this.status === "all") {
+							return this.todoList
+						}
+						const newData = this.todoList.filter(
+							(obj) => obj.finish === this.status
+						)
+						return newData
+					},
+				},
+			}).mount("#app")
+		</script>
+	</body>
+</html>
